@@ -133,4 +133,4 @@ class metatable:
         return self.update_filter(update, None, progress)
 
 if __name__ == "__main__":
-    doctest.testmod()
+    doctest.testmod() # pragma: no cover
