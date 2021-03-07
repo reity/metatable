@@ -9,12 +9,12 @@ import doctest
 import itertools
 import symbolism
 
-class row:
+class row: # pylint: disable=R0903
     """
     Symbolic representation of a row index.
     """
 
-class column(symbolism.symbol):
+class column(symbolism.symbol): # pylint: disable=R0903
     """
     Symbolic representation of a column specified (i.e.,
     a numerical index or an attribute name).
@@ -76,7 +76,7 @@ class metatable:
         for row_ in self.iterable:
             yield row_
 
-    def map(self, function, iterable, progress):
+    def map(self, function, iterable, progress): # pylint: disable=R0201
         """
         Internal method for mapping over the data in the table. This method
         can be redefined in derived classes to change how rows are processed
@@ -84,10 +84,21 @@ class metatable:
         """
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
-    def update_filter(self, update, filter, progress=lambda _: _):
+    def update_filter(self, update, filter, progress=lambda _: _): # pylint: disable=W0622
         """
         Update-then-filter operations across the entire table, based on
         symbolic expressions for the update and filter task(s).
+
+        >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+        >>> t.update_filter({0: column(1)}, column(1) > symbolism.symbol(0))
+        [[1, 1], [2, 2]]
+        >>> list(t)
+        [[1, 1], [2, 2]]
+        >>> t = metatable([['a'], ['b'], ['c']])
+        >>> t.update_filter({3: row}, column(3) < 2)
+        [['a', None, None, 0], ['b', None, None, 1]]
+        >>> list(t)
+        [['a', None, None, 0], ['b', None, None, 1]]
         """
         (rows_in, rows_out) = (iter(self), [])
 
@@ -109,6 +120,15 @@ class metatable:
         """
         Update operation across the entire table, based on a
         symbolic expression for the update task(s).
+
+        >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+        >>> t.update({0: column(1)}) # Replace first-column value with second-column value.
+        [[0, 0], [1, 1], [2, 2]]
+        >>> list(t)
+        [[0, 0], [1, 1], [2, 2]]
+        >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
+        >>> t.update({1: column(0)})
+        [['char', 'num'], ['a', 'a'], ['b', 'b']]
         """
         return self.update_filter(update, None, progress)
 
