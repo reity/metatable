@@ -7,7 +7,7 @@ setup(
     name="metatable",
     version="0.1.0",
     packages=["metatable",],
-    install_requires=[],
+    install_requires=["symbolism",],
     license="MIT",
     url="https://github.com/reity/metatable",
     author="Andrei Lapets",
