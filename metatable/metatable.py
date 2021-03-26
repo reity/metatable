@@ -14,6 +14,11 @@ class row: # pylint: disable=R0903
     Symbolic representation of a row index.
     """
 
+class drop: # pylint: disable=R0903
+    """
+    Symbolic representation of a column drop operation.
+    """
+
 class column(symbolism.symbol): # pylint: disable=R0903
     """
     Symbolic representation of a column specified (i.e.,
@@ -56,10 +61,20 @@ class metatable:
             while col > len(row_) - 1:
                 row_.append(None)
 
+        drops = [] # Columns to drop once updates are evaluated.
         for (col_, upd) in update.items():
-            row_[col_] = metatable._eval(row_, index, upd)
+            if upd is not drop:
+                row_[col_] = metatable._eval(row_, index, upd)
+            else:
+                drops.append(col_)
 
-        return [row_] if filter_ is None or metatable._eval(row_, index, filter_) else []
+        # Apply filter first and then drop columns.
+        if filter_ is None or metatable._eval(row_, index, filter_):
+            row_ = [v for (c, v) in enumerate(row_) if c not in drops] # Drop columns.
+            return [row_]
+
+        # Row was filtered out.
+        return []
 
     def __init__(self, iterable, name=None, header=False):
         """
@@ -104,6 +119,11 @@ class metatable:
 
         if self.header:
             for row_ in rows_in:
+                # Drop columns in header as indicated in update specification.
+                drops = [col_ for (col_, upd) in update.items() if upd is drop]
+                row_ = [v for (c, v) in enumerate(row_) if c not in drops]
+
+                # Add only this header row.
                 rows_out.append(row_)
                 break
 
@@ -129,6 +149,10 @@ class metatable:
         >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
         >>> t.update({1: column(0)})
         [['char', 'num'], ['a', 'a'], ['b', 'b']]
+        >>> t.update({0: drop})
+        [['num'], ['a'], ['b']]
+        >>> t.update({0: drop})
+        [[], [], []]
         """
         return self.update_filter(update, None, progress)
 
