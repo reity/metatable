@@ -108,8 +108,8 @@ class metatable:
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
     def update_filter(
-            self, update, filter, progress=(lambda _: _), strict=False
-        ): # pylint: disable=W0622
+            self, update, filter, progress=(lambda _: _), strict=False, header=None
+        ): # pylint: disable=R0913,W0622
         """
         Update-then-filter operations across the entire table, based on
         symbolic expressions for the update and filter task(s).
@@ -134,8 +134,8 @@ class metatable:
         # Determine the column with the highest index in the update task.
         column_max = max(update.keys())
 
-        # Update the header row if it exists.
-        if self.header:
+        # Update the header row if it exists and no replacement header is specified.
+        if self.header and header is None:
             for row_ in rows_in:
                 # Fill columns that are in the range but that have no expression
                 # in the update tasks.
@@ -154,6 +154,9 @@ class metatable:
                 # Add only this header row.
                 rows_out.append(row_)
                 break
+        elif self.header and header is not None: # A replacement header has been specified.
+            rows_in = itertools.islice(rows_in, 1, None) # Skip the old header row.
+            rows_out.append(header)
 
         rows_out.extend(self.map(
             metatable._upd,
@@ -167,7 +170,7 @@ class metatable:
         self.iterable = rows_out
         return rows_out
 
-    def update(self, update, progress=(lambda _: _), strict=False):
+    def update(self, update, progress=(lambda _: _), strict=False, header=None):
         """
         Update operation across the entire table, based on a
         symbolic expression for the update task(s).
@@ -188,14 +191,16 @@ class metatable:
         >>> t.update([column(1), column(0), drop])
         [[0, 'a'], [1, 'b'], [2, 'c']]
         >>> t = metatable([['c', 'n', 'b'], ['a', 0, True], ['b', 1, True]], header=True)
-        >>> t.update([column(1), column(0)], strict=True)
-        [['c', 'n'], [0, 'a'], [1, 'b']]
+        >>> t.update([column(1), column(0)], strict=True, header=['n', 'c'])
+        [['n', 'c'], [0, 'a'], [1, 'b']]
         >>> t.update([column(1)], strict=True)
+        [['n'], ['a'], ['b']]
+        >>> t.update([column(0)], strict=True, header=['c'])
         [['c'], ['a'], ['b']]
         >>> t.update({2: 'x'})
         [['c', None, None], ['a', None, 'x'], ['b', None, 'x']]
         """
-        return self.update_filter(update, None, progress, strict)
+        return self.update_filter(update, None, progress, strict, header)
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover
