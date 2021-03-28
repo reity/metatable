@@ -118,6 +118,10 @@ class metatable:
         """
         (rows_in, rows_out) = (iter(self), [])
 
+        # If the update task is a list (representing the operation that yields
+        # each column starting from the left-most one), convert it into a dictionary.
+        update = dict(enumerate(update)) if isinstance(update, (tuple, list)) else update
+
         if self.header:
             for row_ in rows_in:
                 # Drop columns in header as indicated in update specification.
@@ -154,6 +158,9 @@ class metatable:
         [['num'], ['a'], ['b']]
         >>> t.update({0: drop})
         [[], [], []]
+        >>> t = metatable([['a', 0, True], ['b', 1, True], ['c', 2, False]])
+        >>> t.update([column(1), column(0), drop])
+        [[0, 'a'], [1, 'b'], [2, 'c']]
         """
         return self.update_filter(update, None, progress)
 
