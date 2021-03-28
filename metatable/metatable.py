@@ -62,16 +62,17 @@ class metatable:
                 row_.append(None)
 
         drops = [] # Columns to drop once updates are evaluated.
+        row__ = list(row_)
         for (col_, upd) in update.items():
             if upd is not drop:
-                row_[col_] = metatable._eval(row_, index, upd)
+                row__[col_] = metatable._eval(row_, index, upd)
             else:
                 drops.append(col_)
 
         # Apply filter first and then drop columns.
-        if filter_ is None or metatable._eval(row_, index, filter_):
-            row_ = [v for (c, v) in enumerate(row_) if c not in drops] # Drop columns.
-            return [row_]
+        if filter_ is None or metatable._eval(row__, index, filter_):
+            row__ = [v for (c, v) in enumerate(row__) if c not in drops] # Drop columns.
+            return [row__]
 
         # Row was filtered out.
         return []
