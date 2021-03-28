@@ -55,14 +55,21 @@ class metatable:
         Internal method for the work to be completed for each row
         during an invocation of an update on the table.
         """
-        ((update, filter_), (index, row_)) = update_filter_index_row
+        ((update, filter_, column_max), (index, row_)) = update_filter_index_row
 
+        # Fill columns that are in the range but that have no expression
+        # in the update tasks.
         for col in update:
             while col > len(row_) - 1:
                 row_.append(None)
 
         drops = [] # Columns to drop once updates are evaluated.
         row__ = list(row_)
+
+        # In strict mode, drop columns which do not appear in the update task.
+        if column_max is not None:
+            row__ = [v for (c, v) in enumerate(row__) if c <= column_max]
+
         for (col_, upd) in update.items():
             if upd is not drop:
                 row__[col_] = metatable._eval(row_, index, upd)
@@ -100,7 +107,9 @@ class metatable:
         """
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
-    def update_filter(self, update, filter, progress=lambda _: _): # pylint: disable=W0622
+    def update_filter(
+            self, update, filter, progress=(lambda _: _), strict=False
+        ): # pylint: disable=W0622
         """
         Update-then-filter operations across the entire table, based on
         symbolic expressions for the update and filter task(s).
@@ -122,8 +131,16 @@ class metatable:
         # each column starting from the left-most one), convert it into a dictionary.
         update = dict(enumerate(update)) if isinstance(update, (tuple, list)) else update
 
+        # Determine the column with the highest index in the update task.
+        column_max = max(update.keys())
+
+        # Update the header row if it exists.
         if self.header:
             for row_ in rows_in:
+                # In strict mode, drop columns which do not appear in the update task.
+                if strict:
+                    row_ = [v for (c, v) in enumerate(row_) if c <= column_max]
+
                 # Drop columns in header as indicated in update specification.
                 drops = [col_ for (col_, upd) in update.items() if upd is drop]
                 row_ = [v for (c, v) in enumerate(row_) if c not in drops]
@@ -134,14 +151,17 @@ class metatable:
 
         rows_out.extend(self.map(
             metatable._upd,
-            zip(itertools.repeat((update, filter)), enumerate(rows_in)),
+            zip(
+                itertools.repeat((update, filter, column_max if strict else None)),
+                enumerate(rows_in)
+            ),
             progress
         ))
 
         self.iterable = rows_out
         return rows_out
 
-    def update(self, update, progress=lambda _: _):
+    def update(self, update, progress=(lambda _: _), strict=False):
         """
         Update operation across the entire table, based on a
         symbolic expression for the update task(s).
@@ -161,8 +181,15 @@ class metatable:
         >>> t = metatable([['a', 0, True], ['b', 1, True], ['c', 2, False]])
         >>> t.update([column(1), column(0), drop])
         [[0, 'a'], [1, 'b'], [2, 'c']]
+        >>> t = metatable([['c', 'n', 'b'], ['a', 0, True], ['b', 1, True]], header=True)
+        >>> t.update([column(1), column(0)], strict=True)
+        [['c', 'n'], [0, 'a'], [1, 'b']]
+        >>> t.update([column(1)], strict=True)
+        [['c'], ['a'], ['b']]
+        >>> t.update({2: 'x'})
+        [['c', None, None], ['a', None, 'x'], ['b', None, 'x']]
         """
-        return self.update_filter(update, None, progress)
+        return self.update_filter(update, None, progress, strict)
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover
