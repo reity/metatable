@@ -137,6 +137,12 @@ class metatable:
         # Update the header row if it exists.
         if self.header:
             for row_ in rows_in:
+                # Fill columns that are in the range but that have no expression
+                # in the update tasks.
+                for col in update:
+                    while col > len(row_) - 1:
+                        row_.append(None)
+
                 # In strict mode, drop columns which do not appear in the update task.
                 if strict:
                     row_ = [v for (c, v) in enumerate(row_) if c <= column_max]
