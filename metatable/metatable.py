@@ -36,7 +36,8 @@ class metatable:
         references to specific attributes/columns of a row.
         """
         if isinstance(e, column):
-            return r[e.evaluate()]
+            index = e.evaluate()
+            return r[index] if index < len(r) else None
 
         if e is row:
             return i
@@ -199,6 +200,9 @@ class metatable:
         [['c'], ['a'], ['b']]
         >>> t.update({2: 'x'})
         [['c', None, None], ['a', None, 'x'], ['b', None, 'x']]
+        >>> t = metatable([['a', 0], ['b'], ['c', 2]])
+        >>> t.update({2: symbolism.is_(column(1), None)})
+        [['a', 0, False], ['b', None, True], ['c', 2, False]]
         """
         return self.update_filter(update, None, progress, strict, header)
 
