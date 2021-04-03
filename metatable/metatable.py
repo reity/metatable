@@ -109,7 +109,8 @@ class metatable:
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
     def update_filter(
-            self, update, filter, progress=(lambda _: _), strict=False, header=None
+            self, update, filter, header=None, strict=False,
+            progress=(lambda *a, **ka: a[0])
         ): # pylint: disable=R0913,W0622
         """
         Update-then-filter operations across the entire table, based on
@@ -171,7 +172,7 @@ class metatable:
         self.iterable = rows_out
         return rows_out
 
-    def update(self, update, progress=(lambda _: _), strict=False, header=None):
+    def update(self, update, header=None, strict=False, progress=(lambda *a, **ka: a[0])):
         """
         Update operation across the entire table, based on a
         symbolic expression for the update task(s).
@@ -204,7 +205,7 @@ class metatable:
         >>> t.update({2: symbolism.is_(column(1), None)})
         [['a', 0, False], ['b', None, True], ['c', 2, False]]
         """
-        return self.update_filter(update, None, progress, strict, header)
+        return self.update_filter(update, None, header, strict, progress)
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover
