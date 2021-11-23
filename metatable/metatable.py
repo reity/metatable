@@ -1,33 +1,30 @@
-"""Extensible table data structure.
-
+"""
 Table data structure that supports the introduction of user-defined workflow
 combinators and the use of these combinators in concise workflow descriptions.
 """
-
 from __future__ import annotations
 import doctest
 import itertools
 import symbolism
 
-class row: # pylint: disable=R0903
-    """
-    Symbolic representation of a row index.
-    """
-
-class drop: # pylint: disable=R0903
-    """
-    Symbolic representation of a column drop operation.
-    """
-
-class column(symbolism.symbol): # pylint: disable=R0903
-    """
-    Symbolic representation of a column specified (i.e.,
-    a numerical index or an attribute name).
-    """
-
 class metatable:
     """
     Class for the extensible metatable data structure.
+
+    >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+    >>> list(iter(t))
+    [['a', 0], ['b', 1], ['c', 2]]
+
+    All rows in an instance can be updated in-place using a symbolic
+    representation of the transformation that must be applied to each
+    row.
+
+    >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
+    >>> t.update({1: column(0)})
+    [['char', 'num'], ['a', 'a'], ['b', 'b']]
+
+    Find more examples under the entries for the :obj:`update` and
+    :obj:`update_filter` methods.
     """
     @staticmethod
     def _eval(r, i, e):
@@ -88,6 +85,10 @@ class metatable:
     def __init__(self, iterable, name=None, header=False):
         """
         Constructor for a table instance that draws data from an iterable.
+
+        >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+        >>> list(t)
+        [['a', 0], ['b', 1], ['c', 2]]
         """
         self.iterable = iterable
         self.name = name
@@ -95,7 +96,11 @@ class metatable:
 
     def __iter__(self):
         """
-        An instance of a table is an iterable.
+        Return this instance as an iterable.
+
+        >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+        >>> list(iter(t))
+        [['a', 0], ['b', 1], ['c', 2]]
         """
         for row_ in self.iterable:
             yield row_
@@ -104,7 +109,11 @@ class metatable:
         """
         Internal method for mapping over the data in the table. This method
         can be redefined in derived classes to change how rows are processed
-        (e.g., to introduce multiprocessing).
+        (*e.g.*, to introduce multiprocessing).
+
+        >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+        >>> list(t.map(lambda row: [[row[1], row[0]]], t, lambda _: _))
+        [[0, 'a'], [1, 'b'], [2, 'c']]
         """
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
@@ -113,14 +122,23 @@ class metatable:
             progress=(lambda *a, **ka: a[0])
         ): # pylint: disable=R0913,W0622
         """
-        Update-then-filter operations across the entire table, based on
-        symbolic expressions for the update and filter task(s).
+        Perform update-then-filter operations across the entire table, based on
+        symbolic expressions for the update and filter task(s). The result of
+        the operation is returned.
 
         >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
         >>> t.update_filter({0: column(1)}, column(1) > symbolism.symbol(0))
         [[1, 1], [2, 2]]
+
+        This instance is modified in-place, so iterating over it again yields
+        the updated version.
+
         >>> list(t)
         [[1, 1], [2, 2]]
+
+        This method can be used in combination with the :obj:`row` class to
+        introduce the row index into a column during the update.
+
         >>> t = metatable([['a'], ['b'], ['c']])
         >>> t.update_filter({3: row}, column(3) < 2)
         [['a', None, None, 0], ['b', None, None, 1]]
@@ -174,17 +192,25 @@ class metatable:
 
     def update(self, update, header=None, strict=False, progress=(lambda *a, **ka: a[0])):
         """
-        Update operation across the entire table, based on a
-        symbolic expression for the update task(s).
+        Update operation across the entire table, based on a symbolic expression
+        for the update task(s).
 
         >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
         >>> t.update({0: column(1)}) # Replace first-column value with second-column value.
         [[0, 0], [1, 1], [2, 2]]
         >>> list(t)
         [[0, 0], [1, 1], [2, 2]]
+
+        If a header row is present (and should be preserved when performing the update),
+        this can be indicated using the ``header`` argument.
+
         >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
         >>> t.update({1: column(0)})
         [['char', 'num'], ['a', 'a'], ['b', 'b']]
+
+        This method can be used in combination with the :obj:`drop` class in order
+        to indicate that a column should be dropped during the update.
+
         >>> t.update({0: drop})
         [['num'], ['a'], ['b']]
         >>> t.update({0: drop})
@@ -192,6 +218,10 @@ class metatable:
         >>> t = metatable([['a', 0, True], ['b', 1, True], ['c', 2, False]])
         >>> t.update([column(1), column(0), drop])
         [[0, 'a'], [1, 'b'], [2, 'c']]
+
+        If the ``strict`` argument is assigned the value ``True``, then columns
+        that do not explicitly appear in the update task specification are dropped.
+
         >>> t = metatable([['c', 'n', 'b'], ['a', 0, True], ['b', 1, True]], header=True)
         >>> t.update([column(1), column(0)], strict=True, header=['n', 'c'])
         [['n', 'c'], [0, 'a'], [1, 'b']]
@@ -201,11 +231,50 @@ class metatable:
         [['c'], ['a'], ['b']]
         >>> t.update({2: 'x'})
         [['c', None, None], ['a', None, 'x'], ['b', None, 'x']]
+
+        Other common operations (such as the functions pre-defined within the
+        `symbolism <https://pypi.org/project/symbolism/>`_ library) can be used
+        to introduce a new computed column (in which the entry for that column
+        in every row is computed using zero or more of the values from that row
+        found in the existing columns).
+
         >>> t = metatable([['a', 0], ['b'], ['c', 2]])
         >>> t.update({2: symbolism.is_(column(1), None)})
         [['a', 0, False], ['b', None, True], ['c', 2, False]]
         """
         return self.update_filter(update, None, header, strict, progress)
+
+class row: # pylint: disable=R0903
+    """
+    Symbolic representation of a row index (for use with methods such as
+    :obj:`metatable.update`).
+
+    >>> t = metatable([['a'], ['b'], ['c']])
+    >>> t.update_filter({3: row}, column(3) < 2)
+    [['a', None, None, 0], ['b', None, None, 1]]
+    """
+
+class drop: # pylint: disable=R0903
+    """
+    Symbolic representation of a column drop operation (for use with methods
+    such as :obj:`metatable.update`).
+
+    >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
+    >>> t.update({1: column(0)})
+    [['char', 'num'], ['a', 'a'], ['b', 'b']]
+    >>> t.update({0: drop})
+    [['num'], ['a'], ['b']]
+    """
+
+class column(symbolism.symbol): # pylint: disable=R0903
+    """
+    Symbolic representation of a column specifier, such as a numerical index
+    or an attribute name (for use with methods such as :obj:`metatable.update`).
+
+    >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
+    >>> t.update_filter({0: column(1)}, column(1) > symbolism.symbol(0))
+    [[1, 1], [2, 2]]
+    """
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover
