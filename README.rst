@@ -10,15 +10,17 @@ Extensible table data structure that supports the introduction of user-defined w
    :target: https://badge.fury.io/py/metatable
    :alt: PyPI version and link.
 
-.. |travis| image:: https://travis-ci.com/reity/metatable.svg?branch=main
-   :target: https://travis-ci.com/reity/metatable
+.. |travis| image:: https://app.travis-ci.com/reity/metatable.svg?branch=main
+   :target: https://app.travis-ci.com/reity/metatable
+   :alt: Travis CI build status.
 
 .. |coveralls| image:: https://coveralls.io/repos/github/reity/metatable/badge.svg?branch=main
    :target: https://coveralls.io/github/reity/metatable?branch=main
+   :alt: Coveralls test coverage summary.
 
 Package Installation and Usage
 ------------------------------
-The package is available on PyPI::
+The package is available on `PyPI <https://pypi.org/project/metatable/>`_::
 
     python -m pip install metatable
 
@@ -41,6 +43,7 @@ Testing and Conventions
 -----------------------
 All unit tests are executed and their coverage is measured when using `nose <https://nose.readthedocs.io/>`_ (see ``setup.cfg`` for configution details)::
 
+    python -m pip install nose coverage
     nosetests
 
 Alternatively, all unit tests are included in the module itself and can be executed using `doctest <https://docs.python.org/3/library/doctest.html>`_::
@@ -49,11 +52,12 @@ Alternatively, all unit tests are included in the module itself and can be execu
 
 Style conventions are enforced using `Pylint <https://www.pylint.org/>`_::
 
+    python -m pip install pylint
     pylint metatable
 
 Contributions
 -------------
-In order to contribute to the source code, open an issue or submit a pull request on the GitHub page for this library.
+In order to contribute to the source code, open an issue or submit a pull request on the `GitHub page <https://github.com/reity/metatable>`_ for this library.
 
 Versioning
 ----------
