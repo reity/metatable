@@ -4,11 +4,15 @@ metatable
 
 Extensible table data structure that supports the introduction of user-defined workflow combinators and the use of these combinators in concise workflow descriptions.
 
-|pypi| |travis| |coveralls|
+|pypi| |readthedocs| |travis| |coveralls|
 
 .. |pypi| image:: https://badge.fury.io/py/metatable.svg
    :target: https://badge.fury.io/py/metatable
    :alt: PyPI version and link.
+
+.. |readthedocs| image:: https://readthedocs.org/projects/metatable/badge/?version=latest
+   :target: https://metatable.readthedocs.io/en/latest/?badge=latest
+   :alt: Read the Docs documentation status.
 
 .. |travis| image:: https://app.travis-ci.com/reity/metatable.svg?branch=main
    :target: https://app.travis-ci.com/reity/metatable
