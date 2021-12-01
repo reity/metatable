@@ -4,7 +4,7 @@ metatable
 
 Extensible table data structure that supports the introduction of user-defined workflow combinators and the use of these combinators in concise workflow descriptions.
 
-|pypi| |readthedocs| |travis| |coveralls|
+|pypi| |readthedocs| |actions| |coveralls|
 
 .. |pypi| image:: https://badge.fury.io/py/metatable.svg
    :target: https://badge.fury.io/py/metatable
@@ -14,9 +14,9 @@ Extensible table data structure that supports the introduction of user-defined w
    :target: https://metatable.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
 
-.. |travis| image:: https://app.travis-ci.com/reity/metatable.svg?branch=main
-   :target: https://app.travis-ci.com/reity/metatable
-   :alt: Travis CI build status.
+.. |actions| image:: https://github.com/reity/metatable/workflows/lint-test-cover/badge.svg
+   :target: https://github.com/reity/metatable/actions/workflows/lint-test-cover.yml
+   :alt: GitHub Actions status.
 
 .. |coveralls| image:: https://coveralls.io/repos/github/reity/metatable/badge.svg?branch=main
    :target: https://coveralls.io/github/reity/metatable?branch=main
