@@ -35,7 +35,7 @@ The library can be imported in the usual ways::
 
 Examples
 ^^^^^^^^
-This library makes it possible to work with tabular data that is represented as a list of lists (*i.e.*, each row is a list of column values and a table is a list of rows).
+This library makes it possible to work with tabular data that is represented as a list of lists (*i.e.*, each row is a list of column values and a table is a list of rows)::
 
     >>> from metatable import *
     >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
