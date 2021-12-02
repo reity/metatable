@@ -14,8 +14,8 @@ Extensible table data structure that supports the introduction of user-defined w
    :target: https://metatable.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
 
-.. |actions| image:: https://github.com/reity/metatable/workflows/lint-test-cover/badge.svg
-   :target: https://github.com/reity/metatable/actions/workflows/lint-test-cover.yml
+.. |actions| image:: https://github.com/reity/metatable/workflows/lint-test-cover-docs/badge.svg
+   :target: https://github.com/reity/metatable/actions/workflows/lint-test-cover-docs.yml
    :alt: GitHub Actions status.
 
 .. |coveralls| image:: https://coveralls.io/repos/github/reity/metatable/badge.svg?branch=main
