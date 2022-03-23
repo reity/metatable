@@ -5,13 +5,13 @@ with open("README.rst", "r") as fh:
 
 # The lines below can be parsed by `docs/conf.py`.
 name = "metatable"
-version = "1.1.2"
+version = "1.2.0"
 
 setup(
     name=name,
     version=version,
     packages=[name,],
-    install_requires=["symbolism~=0.2",],
+    install_requires=["symbolism~=0.3",],
     license="MIT",
     url="https://github.com/reity/metatable",
     author="Andrei Lapets",
@@ -20,6 +20,4 @@ setup(
                 "workflow descriptions via user-defined combinators.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    test_suite="nose.collector",
-    tests_require=["nose"],
 )
