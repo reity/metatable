@@ -105,7 +105,7 @@ class metatable:
         for row_ in self.iterable:
             yield row_
 
-    def map(self, function, iterable, progress): # pylint: disable=R0201
+    def map(self, function, iterable, progress):
         """
         Internal method for mapping over the data in the table. This method
         can be redefined in derived classes to change how rows are processed
