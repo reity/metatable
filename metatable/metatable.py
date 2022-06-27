@@ -3,6 +3,7 @@ Table data structure that supports the introduction of user-defined workflow
 combinators and the use of these combinators in concise workflow descriptions.
 """
 from __future__ import annotations
+from typing import Any, Union, Optional, Callable, Iterable
 import doctest
 import itertools
 import symbolism
@@ -10,6 +11,10 @@ import symbolism
 class metatable:
     """
     Class for the extensible metatable data structure.
+
+    :param iterable: Iterable of rows corresponding to the data in this instance.
+    :param name: Instance name.
+    :param header: Header row consisting of column names.
 
     >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
     >>> list(iter(t))
@@ -27,7 +32,7 @@ class metatable:
     :obj:`update_filter` methods.
     """
     @staticmethod
-    def _eval(r, i, e):
+    def _eval(r: list, i: int, e: Union[column, type, symbolism.symbol]) -> Any:
         """
         Evaluation of a symbolic expression that may contain
         references to specific attributes/columns of a row.
@@ -40,15 +45,15 @@ class metatable:
             return i
 
         if isinstance(e, symbolism.symbol):
-            return\
-                e.evaluate()\
-                if len(e) == 0 else\
+            return \
+                e.evaluate() \
+                if len(e) == 0 else \
                 e.instance(*[metatable._eval(r, i, p) for p in e.parameters])
 
         return e
 
     @staticmethod
-    def _upd(update_filter_index_row):
+    def _upd(update_filter_index_row: tuple) -> list:
         """
         Internal method for the work to be completed for each row
         during an invocation of an update on the table.
@@ -82,7 +87,12 @@ class metatable:
         # Row was filtered out.
         return []
 
-    def __init__(self, iterable, name=None, header=False):
+    def __init__(
+            self: metatable,
+            iterable: Iterable,
+            name: Optional[str] = None,
+            header: Optional[bool] = False
+        ):
         """
         Constructor for a table instance that draws data from an iterable.
 
@@ -94,7 +104,7 @@ class metatable:
         self.name = name
         self.header = header
 
-    def __iter__(self):
+    def __iter__(self: metatable) -> Iterable:
         """
         Return this instance as an iterable.
 
@@ -105,11 +115,21 @@ class metatable:
         for row_ in self.iterable:
             yield row_
 
-    def map(self, function, iterable, progress):
+    def map(
+            self: metatable,
+            function: Callable,
+            iterable: Iterable,
+            progress: Callable
+        ) -> Iterable:
         """
         Internal method for mapping over the data in the table. This method
         can be redefined in derived classes to change how rows are processed
         (*e.g.*, to introduce multiprocessing).
+
+        :param function: Function to apply to every item in the iterable.
+        :param iterable: Iterable of items to which the function should be applied
+            (this should normally be the instance itself).
+        :param progress: Function that returns its iterable input and reports progress.
 
         >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
         >>> list(t.map(lambda row: [[row[1], row[0]]], t, lambda _: _))
@@ -117,14 +137,26 @@ class metatable:
         """
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
-    def update_filter(
-            self, update, filter, header=None, strict=False,
-            progress=(lambda *a, **ka: a[0])
-        ): # pylint: disable=R0913,W0622
+    def update_filter( # pylint: disable=R0913,W0622
+            self: metatable,
+            update: symbolism.symbol,
+            filter: symbolism.symbol,
+            header: Optional[list] = None,
+            strict: Optional[bool] = False,
+            progress: Optional[Callable] = (lambda *a, **ka: a[0])
+        ) -> list:
         """
         Perform update-then-filter operations across the entire table, based on
         symbolic expressions for the update and filter task(s). The result of
         the operation is returned.
+
+        :param update: Symbolic expression that represents an update operation
+            (to be applied to every row).
+        :param filter: Symbolic expression that represents a filter predicate
+            (to be tested for every row).
+        :param header: Header row for the overall result of this method.
+        :param strict: Drop columns that do not explicitly appear in the update expression.
+        :param progress: Function that returns its iterable input and reports progress.
 
         >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
         >>> t.update_filter({0: column(1)}, column(1) > symbolism.symbol(0))
@@ -190,10 +222,22 @@ class metatable:
         self.iterable = rows_out
         return rows_out
 
-    def update(self, update, header=None, strict=False, progress=(lambda *a, **ka: a[0])):
+    def update(
+            self: metatable,
+            update: symbolism.symbol,
+            header: Optional[list] = None,
+            strict: Optional[bool] = False,
+            progress: Optional[Callable] = (lambda *a, **ka: a[0])
+        ) -> list:
         """
         Update operation across the entire table, based on a symbolic expression
         for the update task(s).
+
+        :param update: Symbolic expression that represents an update operation
+            (to be applied to every row).
+        :param header: Header row for the overall result of this method.
+        :param strict: Drop columns that do not explicitly appear in the update expression.
+        :param progress: Function that returns its iterable input and reports progress.
 
         >>> t = metatable([['a', 0], ['b', 1], ['c', 2]])
         >>> t.update({0: column(1)}) # Replace first-column value with second-column value.
@@ -233,7 +277,7 @@ class metatable:
         [['c', None, None], ['a', None, 'x'], ['b', None, 'x']]
 
         Other common operations (such as the functions pre-defined within the
-        `symbolism <https://pypi.org/project/symbolism/>`_ library) can be used
+        `symbolism <https://pypi.org/project/symbolism>`__ library) can be used
         to introduce a new computed column (in which the entry for that column
         in every row is computed using zero or more of the values from that row
         found in the existing columns).

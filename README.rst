@@ -42,7 +42,10 @@ This library makes it possible to work with tabular data that is represented as 
     >>> list(iter(t))
     [['a', 0], ['b', 1], ['c', 2]]
 
-All rows in a ``metatable`` instance can be updated in-place using a symbolic representation (implemented using the `symbolism <https://pypi.org/project/symbolism>`__ library) of the transformation that must be applied to each row. For example, the transformation ``{1: column(0)}`` indicates that the value in the column having index ``1`` (*i.e.*, the right-hand column) should be replaced with the value in the column having index ``0`` (*i.e.*, the left-hand column)::
+.. |metatable| replace:: ``metatable``
+.. _metatable: https://metatable.readthedocs.io/en/latest/_source/metatable.html#metatable.metatable.metatable
+
+All rows in a |metatable|_ instance can be updated in-place using a symbolic representation (implemented using the `symbolism <https://pypi.org/project/symbolism>`__ library) of the transformation that must be applied to each row. For example, the transformation ``{1: column(0)}`` indicates that the value in the column having index ``1`` (*i.e.*, the right-hand column) should be replaced with the value in the column having index ``0`` (*i.e.*, the left-hand column)::
 
     >>> t.update({1: column(0)})
     [['a', 'a'], ['b', 'b'], ['c', 'c']]
@@ -59,8 +62,6 @@ There is also support for working with a tabular data set in which there is a he
     >>> t = metatable([['char', 'num'], ['a', 0], ['b', 1]], header=True)
     >>> t.update({1: column(0)})
     [['char', 'num'], ['a', 'a'], ['b', 'b']]
-
-See the module documentation for additional examples.
 
 Development
 -----------
