@@ -43,7 +43,7 @@ This library makes it possible to work with tabular data that is represented as 
     [['a', 0], ['b', 1], ['c', 2]]
 
 .. |metatable| replace:: ``metatable``
-.. _metatable: https://metatable.readthedocs.io/en/latest/_source/metatable.html#metatable.metatable.metatable
+.. _metatable: https://metatable.readthedocs.io/en/1.3.0/_source/metatable.html#metatable.metatable.metatable
 
 All rows in a |metatable|_ instance can be updated in-place using a symbolic representation (implemented using the `symbolism <https://pypi.org/project/symbolism>`__ library) of the transformation that must be applied to each row. For example, the transformation ``{1: column(0)}`` indicates that the value in the column having index ``1`` (*i.e.*, the right-hand column) should be replaced with the value in the column having index ``0`` (*i.e.*, the left-hand column)::
 
@@ -88,7 +88,7 @@ Alternatively, all unit tests are included in the module itself and can be execu
 
     python src/metatable/metatable.py -v
 
-Style conventions are enforced using `Pylint <https://www.pylint.org>`__::
+Style conventions are enforced using `Pylint <https://pylint.pycqa.org>`__::
 
     python -m pip install .[lint]
     python -m pylint src/metatable
@@ -107,11 +107,16 @@ This library can be published as a `package on PyPI <https://pypi.org/project/me
 
     python -m pip install .[publish]
 
-Remove any old build/distribution files and package the source into a distribution archive::
+Ensure that the correct version number appears in ``pyproject.toml``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number)::
+
+    git tag ?.?.?
+    git push origin ?.?.?
+
+Remove any old build/distribution files. Then, package the source into a distribution archive::
 
     rm -rf build dist src/*.egg-info
     python -m build --sdist --wheel .
 
-Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__ using the `twine <https://pypi.org/project/twine>`__ package::
+Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__::
 
     python -m twine upload dist/*
