@@ -137,10 +137,10 @@ class metatable:
         """
         return (row for rows in progress(map(function, iterable)) for row in rows)
 
-    def update_filter( # pylint: disable=R0913,W0622
+    def update_filter( # pylint: disable=too-many-arguments
             self: metatable,
             update: symbolism.symbol,
-            filter: symbolism.symbol,
+            filter: symbolism.symbol, # pylint: disable=redefined-builtin
             header: Optional[list] = None,
             strict: Optional[bool] = False,
             progress: Optional[Callable] = (lambda *a, **ka: a[0])
@@ -288,7 +288,7 @@ class metatable:
         """
         return self.update_filter(update, None, header, strict, progress)
 
-class row: # pylint: disable=R0903
+class row: # pylint: disable=too-few-public-methods
     """
     Symbolic representation of a row index (for use with methods such as
     :obj:`metatable.update`).
@@ -298,7 +298,7 @@ class row: # pylint: disable=R0903
     [['a', None, None, 0], ['b', None, None, 1]]
     """
 
-class drop: # pylint: disable=R0903
+class drop: # pylint: disable=too-few-public-methods
     """
     Symbolic representation of a column drop operation (for use with methods
     such as :obj:`metatable.update`).
@@ -310,7 +310,7 @@ class drop: # pylint: disable=R0903
     [['num'], ['a'], ['b']]
     """
 
-class column(symbolism.symbol): # pylint: disable=R0903
+class column(symbolism.symbol): # pylint: disable=too-few-public-methods
     """
     Symbolic representation of a column specifier, such as a numerical index
     or an attribute name (for use with methods such as :obj:`metatable.update`).
@@ -320,5 +320,5 @@ class column(symbolism.symbol): # pylint: disable=R0903
     [[1, 1], [2, 2]]
     """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     doctest.testmod() # pragma: no cover
